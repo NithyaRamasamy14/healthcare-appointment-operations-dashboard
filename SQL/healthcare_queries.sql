@@ -1,101 +1,96 @@
--- Healthcare Appointment & Operations Dashboard
--- SQL Analysis Queries
+/*
+===============================================================================
+Project : Healthcare Appointment & Operations Dashboard
+File    : healthcare_queries.sql
+Purpose : Analyze healthcare appointment volume, realized revenue, appointment
+          outcomes, department performance, wait times, locations, and doctors.
+Database: SQL Server
+Table   : dbo.CleanedAppointments
 
--- 1. Total Appointments
-SELECT COUNT(*) AS TotalAppointments
-FROM CleanedAppointments;
+Notes:
+- These queries use the column names from the project's tested dataset.
+- WaitTime units depend on the source data definition; confirm the unit before
+  documenting it in the dashboard or README.
+- Ophthalmology and Gynecology returned zero realized revenue and zero average
+  wait time during validation. Investigate those records before interpreting
+  the zeros as actual business outcomes.
+===============================================================================
+*/
 
 
--- 2. Total Revenue
-SELECT SUM(RealizedRevenue) AS TotalRevenue
-FROM CleanedAppointments;
+/*-----------------------------------------------------------------------------
+  1. Total Appointments
+  Purpose: Count all appointment records in the cleaned dataset.
+-----------------------------------------------------------------------------*/
+SELECT
+    COUNT(*) AS TotalAppointments
+FROM dbo.CleanedAppointments;
 
 
--- 3. Appointments by Department
+/*-----------------------------------------------------------------------------
+  2. Total Realized Revenue
+  Purpose: Calculate total realized revenue across all appointment records.
+-----------------------------------------------------------------------------*/
+SELECT
+    SUM(RealizedRevenue) AS TotalRevenue
+FROM dbo.CleanedAppointments;
+
+
+/*-----------------------------------------------------------------------------
+  3. Appointments by Department
+  Purpose: Count appointments by department, from highest to lowest volume.
+-----------------------------------------------------------------------------*/
 SELECT
     DepartmentName,
     COUNT(*) AS TotalAppointments
-FROM CleanedAppointments
-GROUP BY DepartmentName
-ORDER BY TotalAppointments DESC;
+FROM dbo.CleanedAppointments
+GROUP BY
+    DepartmentName
+ORDER BY
+    TotalAppointments DESC;
 
 
--- 4. Revenue by Department
+/*-----------------------------------------------------------------------------
+  4. Revenue by Department
+  Purpose: Compare total realized revenue across departments.
+-----------------------------------------------------------------------------*/
 SELECT
     DepartmentName,
     SUM(RealizedRevenue) AS TotalRevenue
-FROM CleanedAppointments
-GROUP BY DepartmentName
-ORDER BY TotalRevenue DESC;
+FROM dbo.CleanedAppointments
+GROUP BY
+    DepartmentName
+ORDER BY
+    TotalRevenue DESC;
 
 
--- 5. Monthly Appointments
+/*-----------------------------------------------------------------------------
+  5. Monthly Appointments
+  Purpose: Count appointments by year and month in chronological order.
+-----------------------------------------------------------------------------*/
 SELECT
-    Year,
-    Month,
+    [Year],
+    [Month],
     MonthName,
     COUNT(*) AS TotalAppointments
-FROM CleanedAppointments
-GROUP BY Year, Month, MonthName
-ORDER BY Year, Month;
+FROM dbo.CleanedAppointments
+GROUP BY
+    [Year],
+    [Month],
+    MonthName
+ORDER BY
+    [Year],
+    [Month];
 
 
--- 6. Monthly Revenue
+/*-----------------------------------------------------------------------------
+  6. Monthly Revenue
+  Purpose: Calculate realized revenue by year and month.
+-----------------------------------------------------------------------------*/
 SELECT
-    Year,
-    Month,
+    [Year],
+    [Month],
     MonthName,
     SUM(RealizedRevenue) AS TotalRevenue
-FROM CleanedAppointments
-GROUP BY Year, Month, MonthName
-ORDER BY Year, Month;
-
-
--- 7. Cancellation Rate
-SELECT
-    COUNT(CASE WHEN IsCancelled = 1 THEN 1 END) * 100.0
-        / COUNT(*) AS CancellationRate
-FROM CleanedAppointments;
-
-
--- 8. No-Show Rate
-SELECT
-    COUNT(CASE WHEN IsNoShow = 1 THEN 1 END) * 100.0
-        / COUNT(*) AS NoShowRate
-FROM CleanedAppointments;
-
-
--- 9. Average Wait Time by Department
-SELECT
-    DepartmentName,
-    AVG(CAST(WaitTime AS DECIMAL(10,2))) AS AvgWaitTime
-FROM CleanedAppointments
-GROUP BY DepartmentName
-ORDER BY AvgWaitTime DESC;
-
-
--- 10. Appointments by Location
-SELECT
-    LocationName,
-    COUNT(*) AS TotalAppointments
-FROM CleanedAppointments
-GROUP BY LocationName
-ORDER BY TotalAppointments DESC;
-
-
--- 11. Top 10 Doctors by Realized Revenue
-SELECT TOP 10
-    DoctorName,
-    SUM(RealizedRevenue) AS TotalRevenue
-FROM CleanedAppointments
-GROUP BY DoctorName
-ORDER BY TotalRevenue DESC;
-
-
--- 12. Appointment Status
-SELECT
-    AppointmentStatus,
-    COUNT(*) AS AppointmentCount
-FROM CleanedAppointments
-GROUP BY AppointmentStatus
-ORDER BY AppointmentCount DESC;
+FROM dbo.CleanedAppointments
+GROUP BY
